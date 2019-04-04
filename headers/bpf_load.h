@@ -4,6 +4,10 @@
 
 #include <bpf/bpf.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_MAPS 32
 #define MAX_PROGS 32
 struct bpf_load_map_def {
@@ -53,4 +57,9 @@ int load_bpf_file_fixup_map(const char *path, fixup_map_cb fixup_map);
 
 void read_trace_pipe(void);
 int bpf_set_link_xdp_fd(int ifindex, int fd, __u32 flags);
+#ifdef __cplusplus
+}
+#endif
+
+
 #endif
