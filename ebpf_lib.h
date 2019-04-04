@@ -7,7 +7,7 @@ extern "C" {
 
 
 int open_bpf_map(const char *file);
-int blacklist_modify(int fd, char *ip_string);
+int add_blacklist(int fd, char *ip_string);
 
 
 

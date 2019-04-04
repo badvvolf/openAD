@@ -23,9 +23,14 @@
 #ifndef __BPF_BPF_H
 #define __BPF_BPF_H
 
+
 #include <linux/bpf.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct bpf_create_map_attr {
 	const char *name;
@@ -110,4 +115,8 @@ int bpf_load_btf(void *btf, __u32 btf_size, char *log_buf, __u32 log_buf_size,
 int bpf_task_fd_query(int pid, int fd, __u32 flags, char *buf, __u32 *buf_len,
 		      __u32 *prog_id, __u32 *fd_type, __u64 *probe_offset,
 		      __u64 *probe_addr);
+#endif
+
+#ifdef __cplusplus
+}
 #endif

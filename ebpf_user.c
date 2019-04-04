@@ -156,14 +156,15 @@ void pre_load_maps_via_fs(struct bpf_map_data *map_data, int idx)
 	//save the map fd to use it...
   file = map_idx_to_export_filename(idx);
 
-  printf("%d\n", idx);
+  printf("%d\n", idx); 
   fd = load_map_file(file, map_data);
-
+  //this is get map file
 
   if (fd > 0) {
     map_data->fd = fd;
 	
   } else {
+    printf("map fd 1 : %d %d\n", fd, idx);
     maps_marked_for_export[idx] = 1;
   }
 }
@@ -173,6 +174,10 @@ int export_map_idx(int map_idx)
   const char *file;
 
   file = map_idx_to_export_filename(map_idx);
+
+  //map_fd is from bpf_load
+  printf("map fd 2 : %d %d\n", map_fd[map_idx], map_idx);
+
 
   if (bpf_obj_pin(map_fd[map_idx], file) != 0) {
     fprintf(stderr, "ERR: Cannot pin map(%s) file:%s err(%d):%s\n",
@@ -287,6 +292,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+  //load ebpf program with opening (exported)map file
+  // if there is no exported map, then open inner file -> after that, 
+  // export it yourself
 	if (load_bpf_file_fixup_map(filename, pre_load_maps_via_fs)) {
 	  fprintf(stderr, "Error in load_bpf_file_fixup_map(): %s", bpf_log_buf);
 		return 1;

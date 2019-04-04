@@ -23,6 +23,13 @@
 #ifndef __BPF_LIBBPF_H
 #define __BPF_LIBBPF_H
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -281,4 +288,9 @@ int bpf_perf_event_read_simple(void *mem, unsigned long size,
 			       unsigned long page_size,
 			       void **buf, size_t *buf_len,
 			       bpf_perf_event_print_t fn, void *priv);
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif

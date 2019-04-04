@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
+
 int open_bpf_map(const char *file)
 {
 	int fd;
@@ -15,19 +16,18 @@ int open_bpf_map(const char *file)
 	return fd;
 }
 
-int blacklist_modify(int fd, char *ip_string)
+int add_blacklist(int fd, char *ip)
 {
 	__u32 values = XDP_DROP;
 	__u32 key;
 	int res;
-	res = inet_pton(AF_INET, ip_string, &key);
-    printf("key is %x %d\n", key, fd);
+	res = inet_pton(AF_INET, ip, &key);
 
 	if (res <= 0) {
 		if (res == 0)
 			fprintf(stderr,
 				"ERR: IPv4 \"%s\" not in presentation format\n",
-				ip_string);
+				ip);
 		else
 			perror("inet_pton");
 		return 1;
@@ -38,7 +38,7 @@ int blacklist_modify(int fd, char *ip_string)
 	if (res != 0) { /* 0 == success */
 		fprintf(stderr,
 			"%s() IP:%s key:0x%X errno(%d/%s)",
-			__func__, ip_string, key, errno, strerror(errno));
+			__func__, ip, key, errno, strerror(errno));
 
 		if (errno == 17) {
 			fprintf(stderr, ": Already in blacklist\n");
@@ -51,4 +51,7 @@ int blacklist_modify(int fd, char *ip_string)
 	return 0;
 }
 
+
+
+load_bpf_file_fixup_map
 
