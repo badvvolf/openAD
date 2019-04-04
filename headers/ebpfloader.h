@@ -18,8 +18,9 @@ private:
 public:
 
     EBPFLoader(std::string, std::string);
-    int32_t load();
+    ~EBPFLoader();
 
+    int32_t load();
 };
 
 #endif

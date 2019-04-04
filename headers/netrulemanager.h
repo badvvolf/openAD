@@ -1,3 +1,6 @@
+#ifndef __NETRULEMANAGER_H
+#define __NETRULEMANAGER_H
+
 #include "ebpfsuper.h"
 
 
@@ -6,9 +9,12 @@ class NetRuleManager : public EBPFSuper{
 
 private: 
 
-    
 public:
 
-    bool addBlacklist(int32_t);    
+    bool addBlacklist(uint32_t);
+    bool subBlacklist(uint32_t);      
+
 
 };
+
+#endif

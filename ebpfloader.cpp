@@ -1,7 +1,6 @@
 
 #include "ebpfloader.h"
 #include <sys/resource.h>
-#include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
@@ -16,6 +15,19 @@ std::string EBPFLoader::net_interface;
 std::map<std::string, bool> EBPFLoader::map_exported;
 std::map<std::string, int32_t> EBPFLoader::map_index; 
 
+
+EBPFLoader::EBPFLoader(string filepath, string interface)
+{
+    filepath_ebpf = filepath;
+    net_interface = interface;
+}
+
+EBPFLoader::~EBPFLoader()
+{
+    map_exported.clear();
+    map_index.clear();
+}
+
 void EBPFLoader::preloadMapsViaFs(struct bpf_map_data *map_data, int32_t mapnum)
 {
     string file;
@@ -24,7 +36,7 @@ void EBPFLoader::preloadMapsViaFs(struct bpf_map_data *map_data, int32_t mapnum)
     file = map_path[map_data->name];
 
     //if already exoirted    
-    if (openExportedMap(file, map_data)) {
+    if (openExportedMap(file, map_data->name)) {
 
         map_data->fd = fd_map_exported[map_data->name];
         map_exported[map_data->name] = true;
@@ -48,16 +60,10 @@ void EBPFLoader::chownExportedMaps(uid_t owner, gid_t group)
 
         if (chown(path.c_str(), owner, group) < 0)
             fprintf(stderr,"WARN: Cannot chown file:%s err(%d):%s\n",
-	                path, errno, strerror(errno));
+	                path.c_str(), errno, strerror(errno));
     }
 }
 
-
-EBPFLoader::EBPFLoader(string filepath, string interface)
-{
-    filepath_ebpf = filepath;
-    net_interface = interface;
-}
 
 int32_t EBPFLoader::load()
 {
@@ -100,7 +106,7 @@ int32_t EBPFLoader::load()
 		printf("link set xdp fd failed\n");
 		return 1;
 	}
-
+    return 0;
 
 }
 
@@ -119,30 +125,7 @@ void EBPFLoader::exportMaps(void)
         //map_fd[] is in bpf_load.h, it has map fd that not exported
         if (bpf_obj_pin(map_fd[index], path.c_str()) != 0) {
             fprintf(stderr, "ERR: Cannot pin map(%s) file:%s err(%d):%s\n",
-            map_data[index].name, path, errno, strerror(errno));
+            map_data[index].name, path.c_str(), errno, strerror(errno));
         }
     }    
 }
-
-
-int main()
-{
-   /* EBPFLoader e;
-    e.Open_bpf_map(file_blacklist);
-    
-        map_path.insert(make_pair((int32_t)MAPNUM::BLACKLIST, "/sys/fs/bpf/blacklist"));
-    char * ip_string = "52.79.102.173";
-   
-	int res = add_blacklist(e.fd_blacklist, ip_string);*/
-//	close(fd_blacklist);
-
-    EBPFLoader e("./build/firewall.o", "ens33");
-    e.load();
-    //string a = "";
-    //std::cout << "hi" << e.openExportedMapBlacklist("") << "\n";
-    /*char * ip_string = "52.79.102.173";
-   
-	int res = add_blacklist(e.fd_blacklist, ip_string);*/
-
-}
-

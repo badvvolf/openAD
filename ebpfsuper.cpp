@@ -3,14 +3,10 @@
  *  Copyright(c) 2017 Andy Gospodarek, Broadcom Limited, Inc.
  */
 #include "ebpfsuper.h"
-//#include "libbpf.h"
 #include "bpf_load.h"
 #include <string.h>
 #include <iostream>
-#include <stdlib.h>
 #include <errno.h>
-
-
 #include <sys/statfs.h>
 #include <libgen.h>
 
@@ -26,8 +22,14 @@ EBPFSuper::EBPFSuper()
 
 }
 
+EBPFSuper::~EBPFSuper()
+{
+    map_path.clear();
+    fd_map_exported.clear();
+}
+
 //open exported map
-bool EBPFSuper::openExportedMap(string path, struct bpf_map_data *map_data)
+bool EBPFSuper::openExportedMap(string path, string mapname)
 {
     if (checkMapPath(path) < 0) {
         exit(-1);
@@ -41,7 +43,7 @@ bool EBPFSuper::openExportedMap(string path, struct bpf_map_data *map_data)
         return false;
     }
     
-    fd_map_exported[map_data->name] =  fd;
+    fd_map_exported[mapname] =  fd;
 
     return true;
 }
@@ -72,7 +74,7 @@ int EBPFSuper::checkMapPath(string path)
                 "ERR: specified path %s is not on BPF FS\n\n"
                 " You need to mount the BPF filesystem type like:\n"
                 "  mount -t bpf bpf /sys/fs/bpf/\n\n",
-                path);
+                path.c_str());
         err = -EINVAL;
     }
 

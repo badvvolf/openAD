@@ -19,14 +19,13 @@ protected:
     static std::map<std::string, std::string> map_path;
     static std::map<std::string, int32_t> fd_map_exported;
 
-    static bool openExportedMap(std::string path, struct bpf_map_data *map_data);
+    static bool openExportedMap(std::string path, std::string mapname);
     static int checkMapPath(std::string path);
 
 public:
 
     EBPFSuper();
-
-    //~EBPFSuper();
+    ~EBPFSuper();
 };
 
 
