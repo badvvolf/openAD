@@ -27,9 +27,6 @@ void Module::addNetRecieveCallback()
     
 }
 
-
-
-
 void Module::addBlacklist(uint32_t ip)
 {
     blacklist.addBlacklist(ip);
@@ -57,7 +54,11 @@ void Module::work()
 //use opensource library - asyn c++ socket programming..
 
 
+void Module::openTCP()
+{
 
+
+}
 
 
 // user call it first (need to... )
@@ -84,3 +85,9 @@ void Module::openNetwork()
 
 }
 
+
+int main()
+{
+    Module module;
+    
+}

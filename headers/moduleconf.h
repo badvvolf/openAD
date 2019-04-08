@@ -2,6 +2,7 @@
 #define __MODULECONF_H
 
 #include "configuration.h"
+#include <cstdint>
 
 class ModuleConf : public Configuration {
 

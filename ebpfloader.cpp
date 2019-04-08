@@ -7,7 +7,6 @@
 #include "bpf_load.h"
 #include <net/if.h>
 
-
 using namespace std;
 
 std::string EBPFLoader::filepath_ebpf;
