@@ -113,6 +113,7 @@ int32_t EBPFLoader::load()
 void EBPFLoader::exportMaps(void)
 {
     map<string, bool>::iterator iter;
+
     for(iter = map_exported.begin(); iter!=map_exported.end(); iter ++)
     {   
         if(iter->second)
@@ -127,4 +128,12 @@ void EBPFLoader::exportMaps(void)
             map_data[index].name, path.c_str(), errno, strerror(errno));
         }
     }    
+}
+
+
+int main()
+{
+    EBPFLoader loader("./build/firewall.o", "ens33");
+    loader.load();
+
 }

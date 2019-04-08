@@ -86,8 +86,3 @@ void Module::openNetwork()
 }
 
 
-int main()
-{
-    Module module;
-    
-}

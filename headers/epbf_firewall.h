@@ -21,4 +21,10 @@ struct portforward_table_sinfo {
 
 };
 
+struct mac
+{
+    __u8 addr[6];
+};
+
+
 #endif

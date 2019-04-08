@@ -24,7 +24,8 @@
 #include <sys/statfs.h>
 #include <libgen.h>
 
-static const char *file_pinned_map   = "/sys/fs/bpf/blacklist";
+static const char *file_pinned_map[4]   = {"/sys/fs/bpf/blacklist", "/sys/fs/bpf/port_forward_rule", "/sys/fs/bpf/port_forward_table","/sys/fs/bpf/mymac"};
+
 
 static char ifname_buf[IF_NAMESIZE];
 static char *ifname = NULL;
@@ -32,7 +33,7 @@ static char *ifname = NULL;
 static int ifindex = -1;
 static __u32 xdp_flags = 0;
 
-#define NR_MAPS 1
+#define NR_MAPS 4
 
 
 int maps_marked_for_export[MAX_MAPS] = { 0 };
@@ -43,7 +44,7 @@ static const char* map_idx_to_export_filename(int idx)
 
  
   /* Mapping map_fd[idx] to export filenames */
-  switch (idx) {
+  /*switch (idx) {
   case 0: 
     file = file_pinned_map;
     break;
@@ -51,7 +52,9 @@ static const char* map_idx_to_export_filename(int idx)
 		break;
   default:
     break;
-  }
+  }*/
+  file = file_pinned_map[idx];
+
  printf("file : %d %s\n", idx, file);
   if (DEBUG) printf("FileNAME: %s \n", file);
 
