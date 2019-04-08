@@ -95,10 +95,11 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
       struct portforward_table_cinfo cinfo = {};
       struct portforward_table_sinfo *sinfo = NULL;
       struct portforward_table_sinfo sinfo_reg = {};
+      
 
       //out -> in 
       if(direction == INBOUND) {
-            
+
             rule_key = tcp->dest;
             
             rule = bpf_map_lookup_elem(&port_forward_rule, &rule_key);
@@ -111,39 +112,45 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
       
             sinfo = bpf_map_lookup_elem(&port_forward_table, &cinfo);
 
-            // //if it was not connected already
-             if(sinfo == NULL) {
+            //if it was not connected already
+            if(sinfo == NULL) {
                   //add it to portfoward table
                   sinfo_reg.outport = rule->outport;
                   sinfo_reg.inport = rule->inport;
                   sinfo = &sinfo_reg;
-             }
+            }
       
             //change packet
-            tcp->dest = rule->inport;
-      
-            //update timeout
-            sinfo->timeout = TIMEOUT;
- 
+            tcp->dest = sinfo->inport;
       }
       //in -> out
       else if (direction == OUTBOUND) {
-            
-            rule_key = tcp->source;
+ 
+            cinfo.ip = ip->daddr;
+            cinfo.port = tcp->dest;
+      
+            sinfo = bpf_map_lookup_elem(&port_forward_table, &cinfo);
 
+            //if it was not connected already
+            if(sinfo == NULL) {
+                  return PASS;
+            }
+            //change packet
+            tcp->dest = sinfo->outport;
       }
 
+      //update timeout
+      sinfo->timeout = TIMEOUT;
+      
       ///////temp
-      if(sinfo!=NULL)
-            bpf_map_update_elem(&port_forward_table, &cinfo, sinfo, BPF_ANY);
+      bpf_map_update_elem(&port_forward_table, &cinfo, sinfo, BPF_ANY);
 
       return PORTFORWARD;
 }
 
 
-static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, void *data_end )
+static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, void *data_end)
 {
-
       if(ip == NULL)
             return PASS;
 
@@ -154,7 +161,8 @@ static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, v
 
             __u32 iplen = (__u32)(ip->ihl) * 4;
             struct tcphdr * tcp;
-            tcp = (struct tcphdr *)((__u8 *)ip + iplen);
+            tcp = ip + 1;
+            //tcp = (struct tcphdr *)((__u8 *)ip + iplen);
       
             if (tcp + 1 > data_end)
 	            return BLACKLIST;////temp
@@ -192,6 +200,11 @@ static __always_inline int filter_ipv4(struct iphdr *ip, __u32 direction, void *
       if(filter_flag & PORTFORWARD)
       {
             rule = XDP_PASS; //????
+            goto filter_ipv4_end;
+      }
+      if(filter_flag & BLACKLIST)
+      {
+            rule = XDP_DROP;
             goto filter_ipv4_end;
       }
       
@@ -237,9 +250,9 @@ static __always_inline int get_direction(struct ethhdr *eth)
             return OUTBOUND;
       */
 
-      if(bpf_memcmp(eth->h_dest, macaddr, 6))
+      if(!bpf_memcmp(eth->h_dest, macaddr, 6))
             return INBOUND;
-      else if (bpf_memcmp(eth->h_source, macaddr, 6))
+      else if (!bpf_memcmp(eth->h_source, macaddr, 6))
             return OUTBOUND;
 }
 

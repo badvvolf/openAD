@@ -2,6 +2,7 @@
 #define __EBPFLOADER_H
 
 #include "ebpfsuper.h"
+#include "epbf_firewall.h"
 
 class EBPFLoader : public EBPFSuper{
 
@@ -14,6 +15,7 @@ private:
     static void preloadMapsViaFs(struct bpf_map_data *map_data, int32_t mapnum);
     void exportMaps(void);
     void chownExportedMaps(uid_t owner, gid_t group);
+    bool setMacAddrMap();
 
 public:
 

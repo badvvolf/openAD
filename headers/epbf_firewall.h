@@ -4,8 +4,8 @@
 #include <linux/types.h>
 
 struct portforward_rule {
-    __u16 inport;
     __u16 outport;
+    __u16 inport;
 };
 
 struct portforward_table_cinfo {
@@ -14,15 +14,13 @@ struct portforward_table_cinfo {
 };
 
 struct portforward_table_sinfo {
-    
-    __u16 inport;
     __u16 outport;
+    __u16 inport;
     __u32 timeout;
 
 };
 
-struct mac
-{
+struct mac {
     __u8 addr[6];
 };
 
