@@ -24,5 +24,14 @@ struct mac {
     __u8 addr[6];
 };
 
+struct test {
+    // __u16 outport;
+    // __u16 inport;
+    __u8 addr_dest[50];
+    //__u32 dip;
+   // __u32 sip;
+    
+};
+
 
 #endif

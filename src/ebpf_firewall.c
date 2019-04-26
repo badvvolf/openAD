@@ -12,6 +12,12 @@
 #include <linux/tcp.h>
 #include <linux/in.h>
 
+
+#include <linux/pkt_cls.h>
+#include <iproute2/bpf_elf.h>
+
+
+
 #define SEC(NAME) __attribute__((section(NAME), used))
 
 #define bpf_htons(x) ((__be16)___constant_swab16((x)))
@@ -24,6 +30,13 @@
 //////
 
 
+#ifndef lock_xadd
+# define lock_xadd(ptr, val)              \
+   ((void)__sync_fetch_and_add(ptr, val))
+#endif
+
+
+////////////
 enum direction{ 
       INBOUND = 0x00000001,
       OUTBOUND = 0x00000002,
@@ -78,6 +91,25 @@ struct bpf_map_def SEC("maps") mymac = {
       .map_flags   = BPF_F_NO_PREALLOC,
 };
 
+
+struct bpf_elf_map SEC("maps") result = {
+      .type        = BPF_MAP_TYPE_HASH,
+      .size_key    = sizeof(__u32),
+      .size_value  = sizeof(struct test),
+      .pinning        = PIN_GLOBAL_NS, 
+      .max_elem       = 100,
+};
+
+
+struct bpf_elf_map SEC("maps") counter = {
+      .type        = BPF_MAP_TYPE_HASH,
+      .size_key    = sizeof(__u32),
+      .size_value  = sizeof(__u32), 
+      .pinning        = PIN_GLOBAL_NS, 
+      .max_elem       = 1,
+};
+
+
 static __always_inline int process_blacklist(__u32 saddr)
 {
       __u32 *value = bpf_map_lookup_elem(&blacklist, &saddr);
@@ -95,13 +127,13 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
       struct portforward_table_cinfo cinfo = {};
       struct portforward_table_sinfo *sinfo = NULL;
       struct portforward_table_sinfo sinfo_reg = {};
-      
-
+     
       //out -> in 
       if(direction == INBOUND) {
 
             rule_key = tcp->dest;
             
+
             rule = bpf_map_lookup_elem(&port_forward_rule, &rule_key);
             
             if(rule == NULL)
@@ -125,7 +157,9 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
       }
       //in -> out
       else if (direction == OUTBOUND) {
- 
+                  
+            
+
             cinfo.ip = ip->daddr;
             cinfo.port = tcp->dest;
       
@@ -133,10 +167,10 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
 
             //if it was not connected already
             if(sinfo == NULL) {
-                  return PASS;
+                  return BLACKLIST;
             }
             //change packet
-            tcp->dest = sinfo->outport;
+            tcp->source = sinfo->outport;
       }
 
       //update timeout
@@ -151,8 +185,10 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
 
 static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, void *data_end)
 {
+      
       if(ip == NULL)
             return PASS;
+            
 
       switch(ip->protocol)
       {
@@ -161,8 +197,8 @@ static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, v
 
             __u32 iplen = (__u32)(ip->ihl) * 4;
             struct tcphdr * tcp;
-            tcp = ip + 1;
-            //tcp = (struct tcphdr *)((__u8 *)ip + iplen);
+            //tcp = ip + 1;
+            tcp = (struct tcphdr *)((__u8 *)ip + iplen);
       
             if (tcp + 1 > data_end)
 	            return BLACKLIST;////temp
@@ -202,6 +238,8 @@ static __always_inline int filter_ipv4(struct iphdr *ip, __u32 direction, void *
             rule = XDP_PASS; //????
             goto filter_ipv4_end;
       }
+
+      //////temp
       if(filter_flag & BLACKLIST)
       {
             rule = XDP_DROP;
@@ -224,36 +262,19 @@ static __always_inline int bpf_memcmp(void * s1, void * s2, __s32 n)
       return 0;
 }
 
-static __always_inline int get_direction(struct ethhdr *eth)
+static __always_inline int get_direction(struct ethhdr *eth, void *data_end)
 {
       __u8 key = 0;
       struct mac *macaddr = bpf_map_lookup_elem(&mymac, &key);
 
-      //if they are same?
       if(macaddr==NULL)
             return DIRCTIONERR;
-      /*
-      if(eth->h_dest[0] == macaddr->addr[0]
-            && eth->h_dest[1] == macaddr->addr[1]
-            && eth->h_dest[2] == macaddr->addr[2]
-            && eth->h_dest[3] == macaddr->addr[3]
-            && eth->h_dest[4] == macaddr->addr[4]
-            && eth->h_dest[5] == macaddr->addr[5])
-            return INBOUND;
-
-      if(eth->h_source[0] == macaddr->addr[0]
-            && eth->h_source[1] == macaddr->addr[1]
-            && eth->h_source[2] == macaddr->addr[2]
-            && eth->h_source[3] == macaddr->addr[3]
-            && eth->h_source[4] == macaddr->addr[4]
-            && eth->h_source[5] == macaddr->addr[5])
-            return OUTBOUND;
-      */
 
       if(!bpf_memcmp(eth->h_dest, macaddr, 6))
             return INBOUND;
-      else if (!bpf_memcmp(eth->h_source, macaddr, 6))
-            return OUTBOUND;
+      else
+           return DIRCTIONERR;
+
 }
 
 static __always_inline int get_filter_result(void *data, void *data_end)
@@ -261,11 +282,11 @@ static __always_inline int get_filter_result(void *data, void *data_end)
       struct ethhdr *eth = data;
       __u16 eth_proto = eth->h_proto;
       
-      __u32 direction = get_direction(eth);
+      __u32 direction = get_direction(eth, data_end);
       
       if(direction == DIRCTIONERR)
             return XDP_DROP;
-
+      
       //process filtering
 	if (eth_proto == bpf_htons(ETH_P_IP)){
 
@@ -292,6 +313,70 @@ int xdp_filter(struct xdp_md *xdp)
 	      return XDP_DROP;
       else
             return get_filter_result(data, data_end);      
+}
+
+
+
+
+#ifndef BPF_FUNC
+# define BPF_FUNC(NAME, ...)              \
+   (*NAME)(__VA_ARGS__) = (void *)BPF_FUNC_##NAME
+#endif
+
+static void *BPF_FUNC(map_lookup_elem, void *map, const void *key);
+
+static __always_inline int account_data(struct __sk_buff *skb, __u32 dir)
+{
+      __u32 *bytes;
+
+ 
+      __u32 *p_counter = NULL;
+
+   
+      __u8 *ptr = (__u8 *)(long)skb->data;
+      __u32 k = 0;
+      p_counter = bpf_map_lookup_elem(&counter, &k);
+      
+
+      if(p_counter == NULL)
+            return TC_ACT_SHOT;
+
+      __u32 temp = *p_counter;
+
+
+      struct test t = {};
+      
+      if(skb != NULL) {
+            t.addr_dest[0] = (__u8)(skb->len);
+           
+            // t.addr_dest[2] = ptr[2];
+            // t.addr_dest[3] = ptr[3];
+            // t.addr_dest[4] = ptr[4];
+            // t.addr_dest[5] = ptr[5];
+      }
+
+      temp +=1;
+
+      bpf_map_update_elem(&result, &temp, &t, BPF_ANY);
+
+      //update counter
+      bpf_map_update_elem(&counter, &k, &temp, BPF_ANY);
+
+/*
+      bytes = map_lookup_elem(&acc_map, &dir);
+      if (bytes)
+            lock_xadd(bytes, skb->len);
+*/
+      return TC_ACT_OK;
+}
+
+
+
+SEC("egress")
+int tc_egress(struct __sk_buff *skb)
+{
+     
+      return account_data(skb, 1);
 }
 
 

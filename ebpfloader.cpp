@@ -48,9 +48,9 @@ bool EBPFLoader::setMacAddrMap()
 
   	strcpy(s.ifr_name, net_interface.c_str());
     if (0 == ioctl(fd, SIOCGIFHWADDR, &s)) {
-        
-        for (int i = 0; i < 6; ++i)
-            macaddr.addr[i] = s.ifr_addr.sa_data[i];
+        for (int i = 0; i < 6; ++i){
+            macaddr.addr[i] = s.ifr_addr.sa_data[i];   
+        }
     }
 
     close(fd);
@@ -82,9 +82,6 @@ bool EBPFLoader::setMacAddrMap()
 	return true;
 
 }
-
-
-
 
 
 void EBPFLoader::preloadMapsViaFs(struct bpf_map_data *map_data, int32_t mapnum)

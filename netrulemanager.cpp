@@ -4,6 +4,10 @@
 #include <errno.h>
 #include <string.h>
 #include <iostream>
+#include <arpa/inet.h>
+
+
+#include <unistd.h>
 
 using namespace std;
 
@@ -41,8 +45,8 @@ bool NetRuleManager::addBlacklist(uint32_t ban_ip)
 bool NetRuleManager::addPortForward(uint16_t outport, uint16_t inport)
 {
     int32_t fd;
-    struct portforward_rule rule = {outport, inport};
-	uint16_t key = outport;
+    struct portforward_rule rule = {htons(outport), htons(inport)};
+	uint16_t key = htons(outport);
 
 	int32_t res;
     if(fd_map_exported["port_forward_rule"] <= 0)
@@ -69,5 +73,54 @@ bool NetRuleManager::addPortForward(uint16_t outport, uint16_t inport)
 }
 
 
+bool NetRuleManager::initiate_counter()
+{
+	int32_t fd = fd_map_exported["counter"];
+	uint32_t key = 0;
+	uint32_t counter = 0;
+	bpf_map_update_elem(fd, &key, &counter, BPF_NOEXIST);
 
+}
 
+bool NetRuleManager::findTest()
+{
+    
+	uint32_t key = 0;
+	int32_t fd = fd_map_exported["counter"];
+	uint32_t logkey;
+	uint32_t oldkey;
+
+	bpf_map_lookup_elem(fd, &key, &logkey);
+	oldkey = logkey;
+	while(1)
+	{
+		sleep(2);
+		logkey = 0;
+		bpf_map_lookup_elem(fd, &key, &logkey);
+		printf("wake.. %d\n", logkey);
+		if(logkey == oldkey)
+			continue;
+		else
+		{
+			oldkey = logkey;
+		}
+		
+		printf("the log key is %d\n", logkey);
+
+		fd = fd_map_exported["result"];
+
+		for(uint32_t j =0; j<logkey; j++)
+		{
+			struct test t = {};
+			bpf_map_lookup_elem(fd, &j, &t);
+			
+			printf("key %d\t:", j);
+			//printf("result : dport : %d sport : %d\n", t.outport, t.inport);
+			for (int i = 0; i < 50; ++i){
+				printf("%x ",  t.addr_dest[i] );
+			}
+			printf("\n");
+		}
+	}
+	return true;
+}

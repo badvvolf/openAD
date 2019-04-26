@@ -24,7 +24,13 @@
 #include <sys/statfs.h>
 #include <libgen.h>
 
-static const char *file_pinned_map[4]   = {"/sys/fs/bpf/blacklist", "/sys/fs/bpf/port_forward_rule", "/sys/fs/bpf/port_forward_table","/sys/fs/bpf/mymac"};
+static const char *file_pinned_map[6]   = {"/sys/fs/bpf/blacklist", 
+"/sys/fs/bpf/port_forward_rule", 
+"/sys/fs/bpf/port_forward_table",
+"/sys/fs/bpf/mymac", 
+"/sys/fs/bpf/tc/globals/result",
+"/sys/fs/bpf/tc/globals/counter"
+};
 
 
 static char ifname_buf[IF_NAMESIZE];
@@ -33,7 +39,7 @@ static char *ifname = NULL;
 static int ifindex = -1;
 static __u32 xdp_flags = 0;
 
-#define NR_MAPS 4
+#define NR_MAPS 6
 
 
 int maps_marked_for_export[MAX_MAPS] = { 0 };

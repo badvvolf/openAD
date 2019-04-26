@@ -9,7 +9,7 @@ BUILD := ./build
 all : firewall.o
 
 firewall.o:
-	clang -O2 -Wall -target bpf -I./headers -c $(SOURCE)/ebpf_firewall.c -o $(BUILD)/firewall.o 
+	clang -O2 -Wall -target bpf -I./headers -I./headers/iproute2 -c $(SOURCE)/ebpf_firewall.c -o $(BUILD)/firewall.o 
 
 clean:
 	rm -f *.o
