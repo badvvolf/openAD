@@ -14,9 +14,7 @@ public:
     bool addBlacklist(uint32_t);
     bool subBlacklist(uint32_t);      
     bool addPortForward(uint16_t, uint16_t);
-    bool initiate_counter();
 
-bool findTest();
 };
 
 #endif

@@ -20,10 +20,8 @@ EBPFSuper::EBPFSuper()
 {
     map_path["blacklist"] = "/sys/fs/bpf/blacklist";
     map_path["port_forward_rule"] = "/sys/fs/bpf/port_forward_rule";
-    map_path["port_forward_table"] = "/sys/fs/bpf/port_forward_table";
+    map_path["port_forward_table"] = "/sys/fs/bpf/tc/globals/port_forward_table";
     map_path["mymac"] = "/sys/fs/bpf/mymac";
-    map_path["result"] = "/sys/fs/bpf/tc/globals/result";
-    map_path["counter"] = "/sys/fs/bpf/tc/globals/counter";
 
 }
 

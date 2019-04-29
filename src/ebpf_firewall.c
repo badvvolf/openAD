@@ -5,7 +5,7 @@
 #include "bpf_helpers.h" //for ebpf wrapper functinos 
 #include <stddef.h>
 #include <stdbool.h> 
-#include <linux/if_ether.h> 
+#include <linux/if_ether.h>  
 #include <linux/ip.h>
 //#include <netinet/ip.h>
 //#include <arpa/inet.h>
@@ -13,8 +13,6 @@
 #include <linux/in.h>
 
 
-#include <linux/pkt_cls.h>
-#include <iproute2/bpf_elf.h>
 
 
 
@@ -29,11 +27,6 @@
 #define TIMEOUT 0
 //////
 
-
-#ifndef lock_xadd
-# define lock_xadd(ptr, val)              \
-   ((void)__sync_fetch_and_add(ptr, val))
-#endif
 
 
 ////////////
@@ -50,11 +43,6 @@ enum filter_reult{
       PORTFORWARD = 0x00000002
 };
 
-/*
-    To do
-    - search other helper function, like BPF_FUNC_sk_redirect_map
-
-*/
 
 
 //first, ban the blacklist by IP (not consider the port)
@@ -68,7 +56,7 @@ struct bpf_map_def SEC("maps") blacklist = {
 
 struct bpf_map_def SEC("maps") port_forward_rule = {
       .type        = BPF_MAP_TYPE_HASH,
-      .key_size    = sizeof(__u16), //outport
+      .key_size    = sizeof(__u16), //oriport
       .value_size  = sizeof(struct portforward_rule), 
       .max_entries = 0x10000, //temp... did't decide the size
       .map_flags   = BPF_F_NO_PREALLOC,
@@ -76,7 +64,7 @@ struct bpf_map_def SEC("maps") port_forward_rule = {
 
 struct bpf_map_def SEC("maps") port_forward_table = {
       .type        = BPF_MAP_TYPE_HASH,
-      .key_size    = sizeof(struct portforward_table_cinfo), //outport
+      .key_size    = sizeof(struct portforward_table_cinfo), //oriport
       .value_size  = sizeof(struct portforward_table_sinfo), 
       .max_entries = 0x10000, //temp... did't decide the size
       .map_flags   = BPF_F_NO_PREALLOC,
@@ -89,24 +77,6 @@ struct bpf_map_def SEC("maps") mymac = {
       .value_size  = sizeof(struct mac), 
       .max_entries = 0x1,
       .map_flags   = BPF_F_NO_PREALLOC,
-};
-
-
-struct bpf_elf_map SEC("maps") result = {
-      .type        = BPF_MAP_TYPE_HASH,
-      .size_key    = sizeof(__u32),
-      .size_value  = sizeof(struct test),
-      .pinning        = PIN_GLOBAL_NS, 
-      .max_elem       = 100,
-};
-
-
-struct bpf_elf_map SEC("maps") counter = {
-      .type        = BPF_MAP_TYPE_HASH,
-      .size_key    = sizeof(__u32),
-      .size_value  = sizeof(__u32), 
-      .pinning        = PIN_GLOBAL_NS, 
-      .max_elem       = 1,
 };
 
 
@@ -128,7 +98,8 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
       struct portforward_table_sinfo *sinfo = NULL;
       struct portforward_table_sinfo sinfo_reg = {};
      
-      //out -> in 
+      // out -> in
+      // update table
       if(direction == INBOUND) {
 
             rule_key = tcp->dest;
@@ -147,34 +118,17 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
             //if it was not connected already
             if(sinfo == NULL) {
                   //add it to portfoward table
-                  sinfo_reg.outport = rule->outport;
-                  sinfo_reg.inport = rule->inport;
+                  sinfo_reg.oriport = rule->oriport;
+                  sinfo_reg.redirport = rule->redirport;
                   sinfo = &sinfo_reg;
             }
       
             //change packet
-            tcp->dest = sinfo->inport;
-      }
-      //in -> out
-      else if (direction == OUTBOUND) {
-                  
-            
-
-            cinfo.ip = ip->daddr;
-            cinfo.port = tcp->dest;
-      
-            sinfo = bpf_map_lookup_elem(&port_forward_table, &cinfo);
-
-            //if it was not connected already
-            if(sinfo == NULL) {
-                  return BLACKLIST;
-            }
-            //change packet
-            tcp->source = sinfo->outport;
+            tcp->dest = sinfo->redirport;
       }
 
-      //update timeout
-      sinfo->timeout = TIMEOUT;
+      // //update timeout
+      // sinfo->timeout = TIMEOUT;
       
       ///////temp
       bpf_map_update_elem(&port_forward_table, &cinfo, sinfo, BPF_ANY);
@@ -314,71 +268,6 @@ int xdp_filter(struct xdp_md *xdp)
       else
             return get_filter_result(data, data_end);      
 }
-
-
-
-
-#ifndef BPF_FUNC
-# define BPF_FUNC(NAME, ...)              \
-   (*NAME)(__VA_ARGS__) = (void *)BPF_FUNC_##NAME
-#endif
-
-static void *BPF_FUNC(map_lookup_elem, void *map, const void *key);
-
-static __always_inline int account_data(struct __sk_buff *skb, __u32 dir)
-{
-      __u32 *bytes;
-
- 
-      __u32 *p_counter = NULL;
-
-   
-      __u8 *ptr = (__u8 *)(long)skb->data;
-      __u32 k = 0;
-      p_counter = bpf_map_lookup_elem(&counter, &k);
-      
-
-      if(p_counter == NULL)
-            return TC_ACT_SHOT;
-
-      __u32 temp = *p_counter;
-
-
-      struct test t = {};
-      
-      if(skb != NULL) {
-            t.addr_dest[0] = (__u8)(skb->len);
-           
-            // t.addr_dest[2] = ptr[2];
-            // t.addr_dest[3] = ptr[3];
-            // t.addr_dest[4] = ptr[4];
-            // t.addr_dest[5] = ptr[5];
-      }
-
-      temp +=1;
-
-      bpf_map_update_elem(&result, &temp, &t, BPF_ANY);
-
-      //update counter
-      bpf_map_update_elem(&counter, &k, &temp, BPF_ANY);
-
-/*
-      bytes = map_lookup_elem(&acc_map, &dir);
-      if (bytes)
-            lock_xadd(bytes, skb->len);
-*/
-      return TC_ACT_OK;
-}
-
-
-
-SEC("egress")
-int tc_egress(struct __sk_buff *skb)
-{
-     
-      return account_data(skb, 1);
-}
-
 
 
 
