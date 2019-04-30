@@ -9,8 +9,8 @@ private:
     NetRuleManager net_rule_manager;
 public:
 
-    bool addBlacklist(uint32_t);
-    bool subBlacklist(uint32_t);      
+    bool addRule(uint32_t);
+    bool subRule(uint32_t);      
 };
 
 #endif
