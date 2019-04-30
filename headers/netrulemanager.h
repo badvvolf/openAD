@@ -8,6 +8,11 @@ class NetRuleManager : public EBPFSuper{
 
 private: 
 
+    bool setMacAddrInfo();
+    struct mac getMacAddr();
+    static bool isMacSet;
+    
+
 public:
 
     NetRuleManager();

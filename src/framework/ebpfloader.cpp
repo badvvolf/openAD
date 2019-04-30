@@ -8,18 +8,12 @@
 #include <net/if.h>
 
 
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <linux/if.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <string.h>
+
 
 
 using namespace std;
 
 std::string EBPFLoader::filepath_ebpf;
-std::string EBPFLoader::net_interface;
 std::map<std::string, bool> EBPFLoader::map_exported;
 std::map<std::string, int32_t> EBPFLoader::map_index; 
 
@@ -34,53 +28,6 @@ EBPFLoader::~EBPFLoader()
 {
     map_exported.clear();
     map_index.clear();
-}
-
-
-bool EBPFLoader::setMacAddrMap()
-{
-	int32_t fd;
-    struct mac macaddr = {};
-	uint8_t key = 0;
-
-	struct ifreq s;
-  	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
-
-  	strcpy(s.ifr_name, net_interface.c_str());
-    if (0 == ioctl(fd, SIOCGIFHWADDR, &s)) {
-        for (int i = 0; i < 6; ++i){
-            macaddr.addr[i] = s.ifr_addr.sa_data[i];   
-        }
-    }
-
-    close(fd);
-
-
-
-
-	int32_t res;
-    if(fd_map_exported["mymac"] <= 0)
-        openExportedMap(map_path["mymac"],"mymac");
-    
-    fd = fd_map_exported["mymac"];
-
-    res = bpf_map_update_elem(fd, &key, &macaddr, BPF_NOEXIST);
-
-	if (res != 0) { /* 0 == success */
-		fprintf(stderr,
-			    "%s()  key:0x%X errno(%d/%s)",
-			    __func__, key, errno, strerror(errno));
-
-		if (errno == 17) {
-			fprintf(stderr, ": Already in macaddr\n");
-			return false;
-		}
-		fprintf(stderr, "\n");
-		return true;
-	}
-
-	return true;
-
 }
 
 
@@ -163,7 +110,6 @@ int32_t EBPFLoader::load()
 		return 1;
 	}
 
-    setMacAddrMap();
     return 0;
 
 }

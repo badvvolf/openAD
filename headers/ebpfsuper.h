@@ -14,7 +14,9 @@ class EBPFSuper{
 private: 
 
 protected:
-
+    
+    static std::string net_interface;
+    
     //////////// map path <- read config file
     static std::map<std::string, std::string> map_path;
     static std::map<std::string, int32_t> fd_map_exported;

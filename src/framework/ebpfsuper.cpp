@@ -14,7 +14,7 @@ using namespace std;
 
 std::map<std::string, std::string> EBPFSuper::map_path;
 std::map<std::string, int32_t> EBPFSuper::fd_map_exported;
-
+std::string EBPFSuper::net_interface;
 
 EBPFSuper::EBPFSuper()
 {
