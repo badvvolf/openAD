@@ -38,7 +38,7 @@ static char *ifname = NULL;
 static int ifindex = -1;
 static __u32 xdp_flags = 0;
 
-#define NR_MAPS 6
+#define NR_MAPS 4
 
 
 int maps_marked_for_export[MAX_MAPS] = { 0 };
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
 {
 	const char *optstr = "i:Shvr";
 	struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
-	char filename[256] = "./build/firewall.o";
+	char filename[256] = "./build/firewall_ingress.o";
 	int opt;
 
 	uid_t owner = -1; /* -1 result in no-change of owner */

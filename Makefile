@@ -6,13 +6,13 @@
 SOURCE := ./src
 BUILD := ./build
 
-all : firewall.o egress.o
+all : firewall_ingress.o firewall_egress.o
 
-firewall.o:
-	clang -O2 -Wall -target bpf -I./headers -c $(SOURCE)/ebpf_firewall.c -o $(BUILD)/firewall.o 
+firewall_ingress.o:
+	clang -O2 -Wall -target bpf -I./headers -c $(SOURCE)/ebpf_ingress.c -o $(BUILD)/firewall_ingress.o 
 
-egress.o:
-	clang -O2 -Wall -target bpf -I./headers -I./headers/iproute2 -c $(SOURCE)/egress.c -o $(BUILD)/egress.o 
+firewall_egress.o:
+	clang -O2 -Wall -target bpf -I./headers -I./headers/iproute2 -c $(SOURCE)/ebpf_egress.c -o $(BUILD)/firewall_egress.o 
 
 clean:
 	rm -f *.o

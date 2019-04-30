@@ -30,6 +30,7 @@
 
 // static void *BPF_FUNC(map_lookup_elem, void *map, const void *key);
 
+// share it with firewall
 struct bpf_elf_map SEC("maps") port_forward_table = {
     .type        = BPF_MAP_TYPE_HASH,
     .size_key    = sizeof(struct portforward_table_cinfo), //outport

@@ -40,7 +40,6 @@ enum direction{
 enum filter_reult{
       PASS = 0x00000000,
       BLACKLIST = 0x00000001,
-      PORTFORWARD = 0x00000002
 };
 
 
@@ -62,6 +61,7 @@ struct bpf_map_def SEC("maps") port_forward_rule = {
       .map_flags   = BPF_F_NO_PREALLOC,
 };
 
+// use pinned map -> share with egress
 struct bpf_map_def SEC("maps") port_forward_table = {
       .type        = BPF_MAP_TYPE_HASH,
       .key_size    = sizeof(struct portforward_table_cinfo), //oriport
@@ -80,7 +80,7 @@ struct bpf_map_def SEC("maps") mymac = {
 };
 
 
-static __always_inline int process_blacklist(__u32 saddr)
+static __always_inline int check_blacklist(__u32 saddr)
 {
       __u32 *value = bpf_map_lookup_elem(&blacklist, &saddr);
       
@@ -90,7 +90,7 @@ static __always_inline int process_blacklist(__u32 saddr)
             return PASS;   
 }
 
-static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, __u32 direction,  void *data_end )
+static __always_inline void redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, void *data_end )
 {
       struct portforward_rule * rule = NULL;
       __u16 rule_key;
@@ -100,109 +100,78 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr * tcp, _
      
       // out -> in
       // update table
-      if(direction == INBOUND) {
-
-            rule_key = tcp->dest;
-            
-
-            rule = bpf_map_lookup_elem(&port_forward_rule, &rule_key);
-            
-            if(rule == NULL)
-                  return PASS;
-
-            cinfo.ip = ip->saddr;
-            cinfo.port = tcp->source;
+      rule_key = tcp->dest;
+      rule = bpf_map_lookup_elem(&port_forward_rule, &rule_key);
       
-            sinfo = bpf_map_lookup_elem(&port_forward_table, &cinfo);
+      if(rule == NULL)
+            return;
 
-            //if it was not connected already
-            if(sinfo == NULL) {
-                  //add it to portfoward table
-                  sinfo_reg.oriport = rule->oriport;
-                  sinfo_reg.redirport = rule->redirport;
-                  sinfo = &sinfo_reg;
-            }
-      
-            //change packet
-            tcp->dest = sinfo->redirport;
+      cinfo.ip = ip->saddr;
+      cinfo.port = tcp->source;
+
+      sinfo = bpf_map_lookup_elem(&port_forward_table, &cinfo);
+
+      //if it was not connected already
+      //add it to portfoward table
+      if(sinfo == NULL) {
+            
+            sinfo_reg.oriport = rule->oriport;
+            sinfo_reg.redirport = rule->redirport;
+            sinfo = &sinfo_reg;
       }
 
+      //change packet
+      tcp->dest = sinfo->redirport;
+      
       // //update timeout
       // sinfo->timeout = TIMEOUT;
       
-      ///////temp
       bpf_map_update_elem(&port_forward_table, &cinfo, sinfo, BPF_ANY);
-
-      return PORTFORWARD;
 }
 
 
-static __always_inline int process_redirect(struct iphdr *ip, __u32 direction, void *data_end)
+static __always_inline void process_redirect(struct iphdr *ip, void *data_end)
 {
       
       if(ip == NULL)
-            return PASS;
+            return;
             
-
       switch(ip->protocol)
       {
       
       case IPPROTO_TCP : {
 
             __u32 iplen = (__u32)(ip->ihl) * 4;
-            struct tcphdr * tcp;
-            //tcp = ip + 1;
-            tcp = (struct tcphdr *)((__u8 *)ip + iplen);
+            struct tcphdr * tcp = (struct tcphdr *)((__u8 *)ip + iplen);
       
             if (tcp + 1 > data_end)
-	            return BLACKLIST;////temp
+	            return;
             
-            return redirect_tcp(ip, tcp, direction, data_end); 
-            
+            redirect_tcp(ip, tcp, data_end); 
             break;
             }
+
       default:
-            /////temp
-            return PASS;
+            
             break;
       } //switch(ip->protocol)
-      
-      
- 
-      
+           
 }
 
-static __always_inline int filter_ipv4(struct iphdr *ip, __u32 direction, void *data_end )
+static __always_inline int filter_ipv4(struct iphdr *ip, void *data_end )
 {
-      int filter_flag = 0;
-      int rule = XDP_PASS;
+      int flag = 0;
 
-      filter_flag |= process_blacklist(ip->saddr);
+
+      flag = check_blacklist(ip->saddr);
 
       //drop first
-      if(filter_flag & BLACKLIST)
-      {
-            rule = XDP_DROP;
-            goto filter_ipv4_end;
-      }
+      if(flag == BLACKLIST)
+            return XDP_DROP;
+           
+      process_redirect(ip, data_end);
+      return XDP_PASS;
 
-      filter_flag |= process_redirect(ip, direction, data_end);
-      if(filter_flag & PORTFORWARD)
-      {
-            rule = XDP_PASS; //????
-            goto filter_ipv4_end;
-      }
-
-      //////temp
-      if(filter_flag & BLACKLIST)
-      {
-            rule = XDP_DROP;
-            goto filter_ipv4_end;
-      }
-      
-filter_ipv4_end :
-
-      return rule;
 }
 
 static __always_inline int bpf_memcmp(void * s1, void * s2, __s32 n)
@@ -238,20 +207,21 @@ static __always_inline int get_filter_result(void *data, void *data_end)
       
       __u32 direction = get_direction(eth, data_end);
       
+      // if it's not server's or broadcast, just pass
       if(direction == DIRCTIONERR)
-            return XDP_DROP;
+            return XDP_PASS;
       
       //process filtering
 	if (eth_proto == bpf_htons(ETH_P_IP)){
 
             struct iphdr *ip = data + sizeof(struct ethhdr);
             if (ip + 1 > data_end)
-		      return XDP_DROP;
+		      return XDP_PASS;
 
-            return filter_ipv4(ip, direction, data_end);
+            return filter_ipv4(ip, data_end);
       }
-	else
-		return XDP_PASS;
+
+	return XDP_PASS;
 }
 
 

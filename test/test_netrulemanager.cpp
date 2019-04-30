@@ -5,8 +5,7 @@
 
 int main()
 {
-   
-    EBPFLoader e("./build/firewall.o", "ens33");
+    EBPFLoader e("./build/firewall_ingress.o", "ens33");
     e.load();
     
     char * ip_string = "192.168.42.128";
