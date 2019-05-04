@@ -28,6 +28,7 @@ static const char *file_pinned_map[6]   = {
   "/sys/fs/bpf/blacklist", 
   "/sys/fs/bpf/port_forward_rule", 
   "/sys/fs/bpf/tc/globals/port_forward_table",
+  "/sys/fs/bpf/tc/globals/rptest",
   "/sys/fs/bpf/mymac", 
 };
 

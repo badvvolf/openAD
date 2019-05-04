@@ -25,9 +25,11 @@ firewall_egress.o:
 	clang -O2 -Wall -target bpf -I$(HEADER) -I$(HEADER)/iproute2 -c $(SOURCE_FIREWALL)/ebpf_egress.c -o $(BUILD)/firewall_egress.o 
 
 framework: 
-	g++ $(SOURCE_FRAMEWORK)/ebpfsuper.cpp $(SOURCE_FRAMEWORK)/ebpfloader.cpp $(SOURCE_FRAMEWORK)/netrulemanager.cpp \
-	$(SOURCE_TEST)/test_netrulemanager.cpp $(SOURCE_FRAMEWORK)/bpf_load.o \
-	-o $(BUILD)/main -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
+	g++ $(SOURCE_FRAMEWORK)/*.cpp $(SOURCE_FRAMEWORK)/bpf_load.o $(SOURCE_TEST)/test_module.cpp \
+	-o $(BUILD)/main_test -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
+	# g++ $(SOURCE_FRAMEWORK)/ebpfsuper.cpp $(SOURCE_FRAMEWORK)/ebpfloader.cpp $(SOURCE_FRAMEWORK)/netrulemanager.cpp \
+	# $(SOURCE_TEST)/test_netrulemanager.cpp $(SOURCE_FRAMEWORK)/bpf_load.o \
+	# -o $(BUILD)/main -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
 
 clean_firewall:
 	rm $(BUILD) *.o

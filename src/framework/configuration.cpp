@@ -2,5 +2,5 @@
 
 bool Configuration::isSet()
 {
-    return false;
+    return isConfigured;
 }

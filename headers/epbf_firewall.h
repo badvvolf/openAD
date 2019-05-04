@@ -24,5 +24,11 @@ struct mac {
     __u8 addr[6];
 };
 
+struct rpt {
+    __u32 remote_port;
+    __u32 local_port;
+
+};
+
 
 #endif

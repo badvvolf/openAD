@@ -14,6 +14,5 @@ int main()
     NetRuleManager n;
   //  n.addBlacklist(ip);
   //  n.subBlacklist(ip);
-    n.addPortForward((uint16_t)2222, (uint16_t)12345);
-  //  n.subPortForward((uint16_t)2222, (uint16_t)12345);
+  n.addPortForward((uint16_t)22, (uint16_t)2222);
 }

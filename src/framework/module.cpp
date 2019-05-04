@@ -7,7 +7,7 @@ using namespace std;
 // use try-catch!!!!!!!!!!!!!!!!!!
 
 
-Module::Module()
+Module::Module() : blacklist(logger), moduleconf(logger, blacklist, portforward)
 {
     //get configuration and spread it
     //use moduleconf's method
@@ -20,7 +20,6 @@ void Module::addNetConnectCallback()
     //register user funtion
 }
 
-
 void Module::addNetRecieveCallback()
 {
 
@@ -29,24 +28,22 @@ void Module::addNetRecieveCallback()
 
 void Module::addBlacklist(uint32_t ip)
 {
-    blacklist.addBlacklist(ip);
+    blacklist.addRule(ip);
 }
+
+void Module::subBlacklist(uint32_t ip)
+{
+    blacklist.subRule(ip);
+}
+
 
 
 void Module::work()
 {
-    //if no conf, get conf
-    if(!moduleconf.isSet())
-    {
-        cout <<"Configuraation not set,,, You need to set configuration first" << endl;
-        cout << "Wait for conf by your way.." << endl;
-        //wait for conf
-        //this can be syn (blocked)
-        moduleconf.getConf();
-    }
+    setConf();
 
     //open server if it needs ..
-    openNetwork();
+    //openNetwork();
 
 }
 
@@ -60,13 +57,33 @@ void Module::openTCP()
 
 }
 
+//get module specific conf
+// json module:{}
+std::string Module::getModuleConf()
+{
+    setConf();
+
+}
 
 // user call it first (need to... )
-void Module::addConfiguration()
+//need function to change conf....
+void Module::setConf()
 {
 
-    //conf
+    //if no conf, get conf
+    if(moduleconf.isSet())
+        return;
+
+    cout <<"Configuraation didn't set! You need to set configuration first" << endl;
+    cout << "Wait to set configuration.." << endl;
+
+    //wait for conf
+    //this can be syn (blocked)
     moduleconf.getConf();
+
+    moduleconf.publish();
+
+
 }
 
 void Module::openNetwork()

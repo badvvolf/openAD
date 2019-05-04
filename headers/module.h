@@ -4,7 +4,7 @@
 #include "blacklist.h"
 #include "moduleconf.h"
 #include "logger.h"
-
+#include <string>
 
 class Module {
 
@@ -17,20 +17,27 @@ class Module {
 
     public:
 
-        Module();
         Blacklist blacklist;
         Logger logger;
         ModuleConf moduleconf;
+        Portforward portforward;
+
+        Module();
+        void work();
+
+        void setConf();
+        std::string getModuleConf();
 
         void addNetConnectCallback();
         void addNetRecieveCallback();
         
         void addBlacklist(uint32_t);
-        void addConfiguration();
+        void subBlacklist(uint32_t);
 
+        
         void netReceiveCallback(int32_t);
         
-        void work();
+        
 
 };
 
