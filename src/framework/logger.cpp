@@ -63,14 +63,35 @@ void Logger::publish()
         cout << logstr << endl;
     if(savepoint & (uint32_t)SAVEPOINT::STDERR)
         cerr <<  logstr << endl;
+    if(savepoint & (uint32_t)SAVEPOINT::FILE)
+    {
+        if(!log_file.is_open())
+        {
+            log_file.open(log_path, std::fstream::in | std::fstream::out | std::fstream::app);
+            if(!log_file.is_open())
+            {
+                printf("log file open error %s\n", log_path);
+                return;
+            }
+        }
+        log_file << logstr << std::endl;
+    }
 
     cleanBuf();
 
 }
 
-void Logger::setConf(uint32_t sp)
+void Logger::setConf(uint32_t sp, std::string lp)
 {
     savepoint = sp;
+
+    if(savepoint & (uint32_t)SAVEPOINT::FILE)
+    {
+        if(lp != "")
+            log_path = lp;
+        else
+            {log_path = DEFAULT_LOG_PATH;}
+    }
 }
 
 

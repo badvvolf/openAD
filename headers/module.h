@@ -26,6 +26,13 @@ class Module {
         void work();
 
         void setConf();
+        void setConf(Logger *);
+        void setConf(Blacklist *);
+        void setConf(Portforward *);
+
+
+
+
         std::string getModuleConf();
 
         void addNetConnectCallback();

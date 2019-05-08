@@ -15,9 +15,9 @@ class ModuleConf : public Configuration {
 
 private:
 
-    Logger &logger;
-    Blacklist &blacklist;
-    Portforward &portforward;
+    Logger *logger;
+    Blacklist *blacklist;
+    Portforward *portforward;
 
     std::string totalConf;
     rapidjson::Document conf;
@@ -25,7 +25,10 @@ private:
     void parse();
 
 public:
-    ModuleConf(Logger &, Blacklist &, Portforward &);
+    ModuleConf();
+    // ModuleConf(Logger &);
+    // ModuleConf(Blacklist &);
+    // ModuleConf(Portforward &);
     
     //get conf from UI
     void getConf();
@@ -34,8 +37,15 @@ public:
     //pass conf which this class got
     std::string getConfValueByKeys(std::vector<std::string>);
 
+    
+
     int32_t getNetConf();
-    void publish();
+
+    std::string getModuleConf();
+
+    void publishConf(Logger *);
+    void publishConf(Blacklist *);
+    void publishConf(Portforward *);
 
 
 };
