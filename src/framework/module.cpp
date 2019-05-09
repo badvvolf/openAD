@@ -26,15 +26,7 @@ void Module::addNetRecieveCallback()
     
 }
 
-void Module::addBlacklist(uint32_t ip)
-{
-    blacklist.addRule(ip);
-}
 
-void Module::subBlacklist(uint32_t ip)
-{
-    blacklist.subRule(ip);
-}
 
 
 

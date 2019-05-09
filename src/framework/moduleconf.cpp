@@ -35,10 +35,7 @@ int32_t ModuleConf::getNetConf()
 
 }
 
-void ModuleConf::parse()
-{
-    conf.Parse(totalConf.c_str());
-}
+
 
 // return module's conf -> if you input key list, it returns value?? -> what if it's array or subtree?
 std::string ModuleConf::getModuleConf()

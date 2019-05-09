@@ -1,6 +1,6 @@
 #include "configuration.h"
 
-bool Configuration::isSet()
+void Configuration::parse()
 {
-    return isConfigured;
+    conf.Parse(totalConf.c_str());
 }

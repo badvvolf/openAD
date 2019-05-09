@@ -38,10 +38,6 @@ class Module {
         void addNetConnectCallback();
         void addNetRecieveCallback();
         
-        void addBlacklist(uint32_t);
-        void subBlacklist(uint32_t);
-
-        
         void netReceiveCallback(int32_t);
         
         

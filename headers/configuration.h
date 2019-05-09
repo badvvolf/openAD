@@ -1,13 +1,19 @@
 #ifndef __CONFIGURATION_H
 #define __CONFIGURATION_H
+#include "rapidjson/document.h"     // rapidjson's DOM-style API
+#include <string>
 
 class Configuration {
 
-    protected:
-        bool isConfigured = false;
+protected:
 
-    public:
-        bool isSet();
+    rapidjson::Document conf;
+
+    void parse();
+    std::string totalConf;
+
+public:
+        
 
 
 };

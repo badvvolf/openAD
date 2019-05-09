@@ -1,6 +1,7 @@
 #ifndef __MODULECONF_H
 #define __MODULECONF_H
 
+
 #include "configuration.h"
 #include <cstdint>
 #include <vector>
@@ -19,10 +20,6 @@ private:
     Blacklist *blacklist;
     Portforward *portforward;
 
-    std::string totalConf;
-    rapidjson::Document conf;
-
-    void parse();
 
 public:
     ModuleConf();
