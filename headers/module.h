@@ -6,41 +6,36 @@
 #include "logger.h"
 #include <string>
 
+typedef void (*funcptr_work)(Logger *, Blacklist *, Portforward *);
+
 class Module {
 
     private:
-        void openTCP();
-        void openNetwork();
-        
-        // function pointer connecet_callback
-        // function pointer receive_callback
 
     public:
-
-        Blacklist blacklist;
-        Logger logger;
+        
         ModuleConf moduleconf;
-        Portforward portforward;
+
+        Blacklist *blacklist;
+        Logger *logger;
+        
+        Portforward *portforward;
+
+
+        funcptr_work workfunc;
+
 
         Module();
         void work();
+        void setWork(funcptr_work, Logger * , Blacklist *, Portforward * );
 
-        void setConf();
         void setConf(Logger *);
         void setConf(Blacklist *);
         void setConf(Portforward *);
 
 
-
-
         std::string getModuleConf();
 
-        void addNetConnectCallback();
-        void addNetRecieveCallback();
-        
-        void netReceiveCallback(int32_t);
-        
-        
 
 };
 

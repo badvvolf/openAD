@@ -1,24 +1,33 @@
 #include "module.h"
 #include "logger.h"
+#include "blacklist.h"
+#include "portforward.h"
+#include <iostream>
+
+
+void work(Logger *lg, Blacklist * bl, Portforward * pf);
 
 int main()
 {
-     Module m;
-     m.work();
-    // m.addBlacklist(1);
-    
-    // Logger l;
+    Module m;
 
     Logger l;
     m.setConf(&l);
 
-    l.add("1","2");
-    l.publish();
+    // Portforward p;
+    // m.setConf(&p);
     
-    Blacklist bl;
-    m.setConf(&bl);
+    Blacklist b;
+    m.setConf(&b);
 
-    bl.addRule(1);
+    funcptr_work fp = &work;
     
+   // m.setWork(fp, &l, &b, &p);
 
+}
+
+
+void work(Logger *lg, Blacklist * bl, Portforward * pf)
+{
+    std::cout<<"test"<<std::endl;
 }

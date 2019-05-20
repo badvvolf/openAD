@@ -14,54 +14,34 @@ Module::Module()
 
 }
 
-// register function pointer...
-void Module::addNetConnectCallback()
+
+void Module::setWork(funcptr_work ptr, Logger * lg, Blacklist *bl, Portforward * pf)
 {
-    //register user funtion
+    workfunc = ptr;
+    logger = lg;
+    blacklist = bl;
+    portforward = pf;
 }
-
-void Module::addNetRecieveCallback()
-{
-
-    
-}
-
-
 
 
 
 void Module::work()
 {
-    setConf();
-    
-    //open server if it needs ..
-    //openNetwork();
-
+    while(1)
+    {
+        workfunc(logger, blacklist, portforward);
+    }
 }
 
 //asyn server -> tcp connect -> callNetworkCallback with connect_fd
 //use opensource library - asyn c++ socket programming..
 
 
-void Module::openTCP()
-{
-
-
-}
-
-
-void Module::setConf()
-{
-
-    
-}
-
 //get module specific conf
 // json module:{}
 std::string Module::getModuleConf()
 {
-    setConf();
-
+   
 }
 
 //need function to change conf....
@@ -88,33 +68,13 @@ void Module::setConf(Blacklist *blacklist)
     conf.publishConf(blacklist);
 }
 
-// void Module::setConf(Portforward *portforward)
-// {
-//     ModuleConf conf;
-
-//     cout << "Wait to set configuration.." << endl;
-
-//     conf.getConf();
-//     conf.publishConf(portforward);
-// }
-
-
-
-
-void Module::openNetwork()
+void Module::setConf(Portforward *portforward)
 {
-    //use configuration 
-    switch (moduleconf.getNetConf())
-    {
-    case 0:
-        openTCP();
-        break;
+    ModuleConf conf;
 
-    default:
-        return;
-        break;
-    }
+    cout << "Wait to set configuration.." << endl;
 
+    conf.getConf();
+    conf.publishConf(portforward);
 }
-
 

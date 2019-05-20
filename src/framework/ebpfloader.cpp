@@ -8,9 +8,6 @@
 #include <net/if.h>
 
 
-
-
-
 using namespace std;
 
 std::string EBPFLoader::filepath_ebpf;
@@ -70,6 +67,7 @@ void EBPFLoader::chownExportedMaps(uid_t owner, gid_t group)
 
 int32_t EBPFLoader::load()
 {
+
 	struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
 	uid_t owner = -1; /* -1 result in no-change of owner */
 	gid_t group = -1;

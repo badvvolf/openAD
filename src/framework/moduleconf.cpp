@@ -63,3 +63,9 @@ void ModuleConf::publishConf(Blacklist *blacklist)
 
     blacklist->setConf(black_savepoint, black_backup_path, logset, black_log_savepoint, black_log_path);
 }
+
+void ModuleConf::publishConf(Portforward * portforward)
+{
+
+
+}

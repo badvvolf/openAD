@@ -24,11 +24,10 @@
 #include <sys/statfs.h>
 #include <libgen.h>
 
-static const char *file_pinned_map[6]   = {
+static const char *file_pinned_map[4]   = {
   "/sys/fs/bpf/blacklist", 
   "/sys/fs/bpf/port_forward_rule", 
   "/sys/fs/bpf/tc/globals/port_forward_table",
-  "/sys/fs/bpf/tc/globals/rptest",
   "/sys/fs/bpf/mymac", 
 };
 
