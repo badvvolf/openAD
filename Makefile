@@ -46,6 +46,9 @@ core : framework
 module_honeyport :
 	g++ -o $(BUILD)/module_honeyport $(SOURCE_MODULE)/honeyport.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
 
+module_honeyssh :
+	g++ -o $(BUILD)/module_honeyssh $(SOURCE_MODULE)/honeyssh.cpp -lssh -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
+
 bpf_load.o:
 	gcc $(SOURCE_FRAMEWORK)/bpf_load.c -o bpf_load.o -I$(HEADER) -I$(HEADER_BPF)
 

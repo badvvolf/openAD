@@ -2,3 +2,18 @@
 {"123":"456"}
 {"123":"456"}
 {"123":"456"}
+{"Mon May 20 13:54:51 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14336"}
+{"Mon May 20 13:54:51 2019":"FATAL: ssh_bind_listen(): Failed to import private RSA host key"}
+{"Mon May 20 13:55:20 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14361"}
+{"Mon May 20 13:55:20 2019":"FATAL: ssh_bind_listen(): Failed to import private RSA host key"}
+{"Mon May 20 13:55:21 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14363"}
+{"Mon May 20 13:55:21 2019":"FATAL: ssh_bind_listen(): Failed to import private RSA host key"}
+{"Mon May 20 13:58:01 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14457"}
+{"Mon May 20 13:58:01 2019":"FATAL: ssh_bind_listen(): Binding to 0.0.0.0:2222: Address already in use"}
+{"Mon May 20 13:58:36 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14466"}
+{"Mon May 20 14:04:46 2019":"ssh-honeypot 0.0.8 by Daniel Roberson started on port 2222. PID 14825"}
+{"Mon May 20 14:04:49 2019":"192.168.42.128 Error exchanging keys: Socket error: disconnected"}
+{"Mon May 20 14:05:02 2019":"192.168.42.128 jkj aaaa"}
+{"Mon May 20 14:05:04 2019":"192.168.42.128 jkj dasdasdasd"}
+{"Mon May 20 14:05:05 2019":"192.168.42.128 jkj 23213"}
+{"Mon May 20 14:05:09 2019":"192.168.42.128 jkj testtest"}
