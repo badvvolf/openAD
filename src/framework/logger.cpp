@@ -60,9 +60,9 @@ void Logger::publish()
 
     //publish by config
     if(savepoint & (uint32_t)SAVEPOINT::STDOUT)
-        cout << logstr << endl;
+        cout << logstr <<  endl;
     if(savepoint & (uint32_t)SAVEPOINT::STDERR)
-        cerr <<  logstr << endl;
+        cerr <<  logstr <<  endl;
     if(savepoint & (uint32_t)SAVEPOINT::FILE)
     {
         if(!log_file.is_open())

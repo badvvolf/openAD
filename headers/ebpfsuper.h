@@ -26,7 +26,7 @@ protected:
 
 public:
 
-    EBPFSuper();
+    EBPFSuper(std::string);
     ~EBPFSuper();
 };
 

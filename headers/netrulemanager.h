@@ -15,7 +15,7 @@ private:
 
 public:
 
-    NetRuleManager();
+    NetRuleManager(std::string);
     bool addBlacklist(uint32_t);
     bool subBlacklist(uint32_t);
 

@@ -2,9 +2,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <fstream>
 
-Blacklist::Blacklist(){}
+Blacklist::Blacklist(std::string interface) : net_rule_manager(interface){}
 
 bool Blacklist::isLoggerSet()
 {
@@ -32,7 +31,9 @@ bool Blacklist::addRule(uint32_t ip)
             logger.add("blacklist_add", inet_ntoa(addr));
             logger.publish();
         }
+        return true;
     }
+    return false;
 }
 
 bool Blacklist::subRule(uint32_t ip)
@@ -47,7 +48,9 @@ bool Blacklist::subRule(uint32_t ip)
             logger.add("blacklist_sub", inet_ntoa(addr));
             logger.publish();
         }
+        return true;
     }
+    return false;
 }
 
 

@@ -16,19 +16,14 @@ std::map<std::string, std::string> EBPFSuper::map_path;
 std::map<std::string, int32_t> EBPFSuper::fd_map_exported;
 std::string EBPFSuper::net_interface;
 
-EBPFSuper::EBPFSuper()
+EBPFSuper::EBPFSuper(string interface)
 {
     map_path["blacklist"] = "/sys/fs/bpf/blacklist";
     map_path["port_forward_rule"] = "/sys/fs/bpf/port_forward_rule";
     map_path["port_forward_table"] = "/sys/fs/bpf/tc/globals/port_forward_table";
     map_path["mymac"] = "/sys/fs/bpf/mymac";
-
-
-    // map_path["blacklist"] = "./blacklist";
-    // map_path["port_forward_rule"] = "./port_forward_rule";
-    // map_path["port_forward_table"] = "./port_forward_table";
-    // map_path["mymac"] = "./mymac";
-
+    
+    net_interface = interface;
 }
 
 EBPFSuper::~EBPFSuper()

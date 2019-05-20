@@ -6,7 +6,9 @@
 SOURCE := ./src
 SOURCE_FIREWALL := $(SOURCE)/firewall
 SOURCE_FRAMEWORK := $(SOURCE)/framework
+SOURCE_MODULE := $(SOURCE)/module
 SOURCE_TEST := ./test
+
 
 HEADER := ./headers
 HEADER_BPF := $(HEADER)/bpf
@@ -25,8 +27,11 @@ firewall_egress.o:
 	clang -O2 -Wall -target bpf -I$(HEADER) -I$(HEADER)/iproute2 -c $(SOURCE_FIREWALL)/ebpf_egress.c -o $(BUILD)/firewall_egress.o 
 
 framework: 
-
 	g++ -shared -fPIC -o $(BUILD)/libframework.so $(SOURCE_FRAMEWORK)/*.cpp $(SOURCE_FRAMEWORK)/bpf_load.o -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
+	
+	# you have to copy framework library 
+	# sudo cp libframework.so /usr/lib/libframework.so
+
 	
 	# g++ $(SOURCE_FRAMEWORK)/ebpfsuper.cpp $(SOURCE_FRAMEWORK)/ebpfloader.cpp $(SOURCE_FRAMEWORK)/netrulemanager.cpp \
 	# $(SOURCE_TEST)/test_netrulemanager.cpp $(SOURCE_FRAMEWORK)/bpf_load.o \
@@ -37,6 +42,9 @@ framework:
 
 core : framework
 	g++ -o $(BUILD)/core $(SOURCE)/core_main.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
+
+module_honeyport :
+	g++ -o $(BUILD)/module_honeyport $(SOURCE_MODULE)/honeyport.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
 
 bpf_load.o:
 	gcc $(SOURCE_FRAMEWORK)/bpf_load.c -o bpf_load.o -I$(HEADER) -I$(HEADER_BPF)

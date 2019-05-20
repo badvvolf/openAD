@@ -24,18 +24,25 @@ void Module::setWork(funcptr_work ptr, Logger * lg, Blacklist *bl, Portforward *
 }
 
 
-
-void Module::work()
+void Module::work(bool repeat)
 {
-    while(1)
+    if(workfunc == NULL)
     {
-        workfunc(logger, blacklist, portforward);
+        cout<<"You should set the work function by setWork()" << endl;
+        return;
     }
+
+    if(repeat)
+    {
+        while(1)
+        {
+            workfunc(logger, blacklist, portforward);
+        }
+    }
+    else
+        workfunc(logger, blacklist, portforward);
+
 }
-
-//asyn server -> tcp connect -> callNetworkCallback with connect_fd
-//use opensource library - asyn c++ socket programming..
-
 
 //get module specific conf
 // json module:{}

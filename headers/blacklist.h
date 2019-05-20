@@ -5,6 +5,7 @@
 #include "configuration.h"
 #include "logger.h"
 #include <fstream>
+#include <string>
 
 #define DEFAULT_BLACK_BACKUP_PATH "./blacklist"
 
@@ -25,7 +26,7 @@ private:
 
 public:
 
-    Blacklist();
+    Blacklist(std::string);
 
     bool addRule(uint32_t);
     bool subRule(uint32_t);

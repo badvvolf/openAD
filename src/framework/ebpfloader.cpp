@@ -15,10 +15,9 @@ std::map<std::string, bool> EBPFLoader::map_exported;
 std::map<std::string, int32_t> EBPFLoader::map_index; 
 
 
-EBPFLoader::EBPFLoader(string filepath, string interface)
+EBPFLoader::EBPFLoader(string filepath, string interface) : EBPFSuper(interface)
 {
     filepath_ebpf = filepath;
-    net_interface = interface;
 }
 
 EBPFLoader::~EBPFLoader()

@@ -1,5 +1,10 @@
 #include "portforward.h"
 
+Portforward::Portforward(std::string interface) : net_rule_manager(interface)
+{
+
+}
+
 bool Portforward::addRule(uint16_t outport, uint16_t inport)
 {
     //save to the portforward list (DB..)

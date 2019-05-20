@@ -3,7 +3,7 @@
 #include "blacklist.h"
 #include "portforward.h"
 #include <iostream>
-
+#include <unistd.h>
 
 void work(Logger *lg, Blacklist * bl, Portforward * pf);
 
@@ -14,15 +14,14 @@ int main()
     Logger l;
     m.setConf(&l);
 
-    // Portforward p;
-    // m.setConf(&p);
-    
-    Blacklist b;
-    m.setConf(&b);
+    Portforward p;
+    m.setConf(&p);
 
     funcptr_work fp = &work;
     
-   // m.setWork(fp, &l, &b, &p);
+    m.setWork(fp, &l, NULL, &p);
+
+    m.work();
 
 }
 
@@ -30,4 +29,7 @@ int main()
 void work(Logger *lg, Blacklist * bl, Portforward * pf)
 {
     std::cout<<"test"<<std::endl;
+    lg->add("123", "456");
+    lg->publish();
+    sleep(5);
 }

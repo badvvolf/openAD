@@ -17,7 +17,7 @@ using namespace std;
 
 bool NetRuleManager::isMacSet = false;
 
-NetRuleManager::NetRuleManager()
+NetRuleManager::NetRuleManager(string interface) : EBPFSuper(interface)
 {
 	if(fd_map_exported["blacklist"] <= 0)
     	openExportedMap(map_path["blacklist"],"blacklist");
@@ -29,7 +29,8 @@ NetRuleManager::NetRuleManager()
         openExportedMap(map_path["mymac"],"mymac");
 	
 	setMacAddrInfo();
-		
+	
+	cout << "initial"<<endl;
 }
 
 
@@ -41,6 +42,8 @@ bool NetRuleManager::setMacAddrInfo()
 	
 	if(isMacSet)
 		return true;
+
+	cout << "setting MAC" << endl;
 
 	struct mac macaddr = getMacAddr();
     
@@ -71,14 +74,17 @@ struct mac NetRuleManager::getMacAddr()
 	struct mac macaddr = {};
   	int32_t fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 
+	cout << "fd " << fd << net_interface << "????" << endl;
   	strcpy(s.ifr_name, net_interface.c_str());
     if (0 == ioctl(fd, SIOCGIFHWADDR, &s)) {
         for (int i = 0; i < 6; ++i){
-            macaddr.addr[i] = s.ifr_addr.sa_data[i];   
+            macaddr.addr[i] = s.ifr_addr.sa_data[i];
+			cout << macaddr.addr[i];
         }
+		cout <<"???"<< endl;
     }
 	close(fd);
-
+	cout <<"!!!"<< endl;
 	return macaddr;
 }
 
