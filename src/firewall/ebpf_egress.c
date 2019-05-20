@@ -41,7 +41,10 @@ struct bpf_elf_map SEC("maps") port_forward_table = {
 
 
 
-static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr *tcp)
+#define TCP_CSUM_OFF (ETH_HLEN + sizeof(struct iphdr) + offsetof(struct tcphdr, check))
+#define TCP_SPORT_OFF (ETH_HLEN + sizeof(struct iphdr) + offsetof(struct tcphdr, source))
+
+static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr *tcp, struct __sk_buff *skb)
 {
     struct portforward_table_cinfo cinfo = {};
     struct portforward_table_sinfo *sinfo = NULL;
@@ -57,8 +60,11 @@ static __always_inline int redirect_tcp(struct iphdr *ip, struct tcphdr *tcp)
 
     if(sinfo != NULL) {
         //change port
-        tcp->source = sinfo->oriport;
-        
+        __u16 old_port = tcp->source ;
+        __u16 new_port = sinfo->oriport;
+        bpf_l4_csum_replace(skb, TCP_CSUM_OFF, old_port, new_port, sizeof(__u16));
+	    bpf_skb_store_bytes(skb, TCP_SPORT_OFF, &new_port, sizeof(__u16), 0);
+
         //sinfo->timeout = TIMEOUT;
     }
     
@@ -92,7 +98,7 @@ int tc_egress(struct __sk_buff *skb)
             if(tcp + 1 > data_end)
                 return TC_ACT_OK;
 
-            return redirect_tcp(ip, tcp);
+            return redirect_tcp(ip, tcp, skb);
             
             break;
             }
