@@ -53,6 +53,8 @@ int main()
     m.setWork(fp, &l, NULL, NULL);
     logger = &l;
 
+    //printf("%s\n", m.getModuleConf("hello").c_str());
+
     m.work(false);
 }
 
@@ -85,42 +87,42 @@ int	use_syslog = 0;
 /* usage() -- prints out usage instructions and exits the program
  */
 static void usage (const char *progname) {
-  fprintf (stderr, "ssh-honeypot %s by %s\n\n", VERSION, AUTHOR);
+    fprintf (stderr, "ssh-honeypot %s by %s\n\n", VERSION, AUTHOR);
 
-  fprintf (stderr, "usage: %s "
-	   "[-?h -p <port> -a <address> -b <index> -l <file> -r <file> "
-	   "-f <file> -u <user>]\n",
-	   progname);
-  fprintf (stderr, "\t-?/-h\t\t-- this help menu\n");
-  fprintf (stderr, "\t-p <port>\t-- listen port\n");
-  fprintf (stderr, "\t-a <address>\t-- IP address to bind to\n");
-  fprintf (stderr, "\t-l <file>\t-- log file\n");
-  fprintf (stderr, "\t-s\t\t-- toggle syslog usage. Default: %s\n",
-	   use_syslog ? "on" : "off");
-  fprintf (stderr, "\t-r <file>\t-- specify RSA key to use\n");
-  fprintf (stderr, "\t-f <file>\t-- specify location to PID file\n");
-  fprintf (stderr, "\t-b\t\t-- list available banners\n");
-  fprintf (stderr, "\t-b <string> \t-- specify banner string (max 255 characters)\n");
-  fprintf (stderr, "\t-i <index>\t-- specify banner index\n");
-  fprintf (stderr, "\t-u <user>\t-- user to setuid() to after bind()\n");
+    fprintf (stderr, "usage: %s "
+        "[-?h -p <port> -a <address> -b <index> -l <file> -r <file> "
+        "-f <file> -u <user>]\n",
+        progname);
+    fprintf (stderr, "\t-?/-h\t\t-- this help menu\n");
+    fprintf (stderr, "\t-p <port>\t-- listen port\n");
+    fprintf (stderr, "\t-a <address>\t-- IP address to bind to\n");
+    fprintf (stderr, "\t-l <file>\t-- log file\n");
+    fprintf (stderr, "\t-s\t\t-- toggle syslog usage. Default: %s\n",
+        use_syslog ? "on" : "off");
+    fprintf (stderr, "\t-r <file>\t-- specify RSA key to use\n");
+    fprintf (stderr, "\t-f <file>\t-- specify location to PID file\n");
+    fprintf (stderr, "\t-b\t\t-- list available banners\n");
+    fprintf (stderr, "\t-b <string> \t-- specify banner string (max 255 characters)\n");
+    fprintf (stderr, "\t-i <index>\t-- specify banner index\n");
+    fprintf (stderr, "\t-u <user>\t-- user to setuid() to after bind()\n");
 
-  exit (EXIT_FAILURE);
+    exit (EXIT_FAILURE);
 }
 
 
 /* pr_banners() -- prints out a list of available banner options
  */
 static void pr_banners () {
-  size_t	i;
+    size_t	i;
 
-  fprintf (stderr, "Available banners: [index] banner (description)\n");
+    fprintf (stderr, "Available banners: [index] banner (description)\n");
 
-  for (i = 0; i < num_banners; i++) {
-    struct banner_info_s *banner = banners + i;
-    fprintf (stderr, "[%zu] %s (%s)\n", i, banner->str, banner->info);
-  }
+    for (i = 0; i < num_banners; i++) {
+        struct banner_info_s *banner = banners + i;
+        fprintf (stderr, "[%zu] %s (%s)\n", i, banner->str, banner->info);
+    }
 
-  fprintf (stderr, "Total banners: %zu\n", num_banners);
+    fprintf (stderr, "Total banners: %zu\n", num_banners);
 }
 
 

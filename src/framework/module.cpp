@@ -46,9 +46,12 @@ void Module::work(bool repeat)
 
 //get module specific conf
 // json module:{}
-std::string Module::getModuleConf()
+std::string Module::getModuleConf(std::string key)
 {
+   ModuleConf conf;
    
+   conf.getConf();
+   return conf.getConfValueByKey(key);
 }
 
 //need function to change conf....

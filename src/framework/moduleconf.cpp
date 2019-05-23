@@ -14,23 +14,22 @@ ModuleConf::ModuleConf()
 void ModuleConf::getConf()
 {
     //get conf from UI
-    totalConf =  "{\"conf\":{\"log\":{\"sp\":4,\"lp\":\"\"},\"bl\":{\"sp\":4,\"bp\":\"\",\"logset\":true,\"log\":{\"sp\":4,\"lp\":\"./log\"}},\"pf\":{\"sp\":1},\"module\":{\"hello\":\"hi\"}}}";
+    totalConf =  "{\"conf\":{\"log\":{\"sp\":4,\"lp\":\"\"},\"bl\":{\"sp\":4,\"bp\":\"\",\"logset\":true,\"log\":{\"sp\":4,\"lp\":\"./log\"}},\"pf\":{\"sp\":1},\"module\":{\"hello\":\"hi\",\"asd\":\"3\"}}}";
 
     parse();
 }
 
 
-std::string ModuleConf::getConfValueByKeys(vector<string> keys)
+std::string ModuleConf::getConfValueByKey(std::string key)
 {
-    //conf.
-   
-    
+    //conf
+    return conf["conf"]["module"][key.c_str()].GetString();
 }
 
 
 int32_t ModuleConf::getNetConf()
 {
-
+    
     return 1;
 
 }
@@ -40,7 +39,14 @@ int32_t ModuleConf::getNetConf()
 // return module's conf -> if you input key list, it returns value?? -> what if it's array or subtree?
 std::string ModuleConf::getModuleConf()
 {
-    
+    // rapidjson::Value::MemberIterator itr;
+    // for ( itr= conf["conf"]["module"].MemberBegin(); itr !=  conf["conf"]["module"].MemberEnd(); ++itr)
+    // {
+    //     printf("Type of member %s is %s %p\n",
+    //         itr->name.GetString(), itr->value.GetString(), itr);
+    // }
+    // printf("???? %p\n", itr);
+
 
 }
 

@@ -34,7 +34,7 @@ class Module {
         void setConf(Portforward *);
 
 
-        std::string getModuleConf();
+        std::string getModuleConf(std::string);
 
 
 };

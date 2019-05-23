@@ -234,7 +234,7 @@ int xdp_filter(struct xdp_md *xdp)
 	struct ethhdr *eth = data;
 
 	if (eth + 1 > data_end)
-	      return XDP_DROP;
+	      return XDP_PASS;
       else
             return get_filter_result(data, data_end);      
 }

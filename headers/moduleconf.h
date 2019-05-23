@@ -32,7 +32,7 @@ public:
     
     
     //pass conf which this class got
-    std::string getConfValueByKeys(std::vector<std::string>);
+    std::string getConfValueByKey(std::string );
 
     
 
