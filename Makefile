@@ -1,4 +1,3 @@
-
 # Notice: the kbuilddir can be redefined on make cmdline
 #kbuilddir ?= /lib/modules/$(shell uname -r)/build
 #KERNEL=$(kbuilddir)
@@ -12,6 +11,7 @@ SOURCE_ETC := $(SOURCE)/etc
 
 HEADER := ./headers
 HEADER_BPF := $(HEADER)/bpf
+HEADER_LIBBPF := ./libbpf/src
 
 
 BUILD := ./build
@@ -41,7 +41,7 @@ framework:
 	# -o $(BUILD)/main_test -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
 
 core : framework
-	g++ -o $(BUILD)/core $(SOURCE)/core_main.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
+	g++ -o $(BUILD)/core $(SOURCE)/core_main.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD) -I$(HEADER_LIBBPF)
 
 module_honeyport :
 	g++ -o $(BUILD)/module_honeyport $(SOURCE_MODULE)/honeyport.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
