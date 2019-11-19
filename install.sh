@@ -4,6 +4,10 @@ sudo apt-get install libc6-dev-i386
 sudo apt-get install libelf-dev
 sudo apt-get install clang
 
+
+git submodule init
+git submodule update
+
 cd ./libbpf/src
 make
 sudo cp libbpf.so /usr/lib/.
