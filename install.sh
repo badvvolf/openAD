@@ -2,6 +2,7 @@
 sudo apt-get install libssh-dev libjson-c-dev
 sudo apt-get install libc6-dev-i386
 sudo apt-get install libelf-dev
+sudo apt-get install clang
 
 cd ./libbpf/src
 make
