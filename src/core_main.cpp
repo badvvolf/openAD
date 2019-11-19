@@ -3,12 +3,23 @@
 #include <cstdint>
 #include <arpa/inet.h>
 #include <logger.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 int main()
 {
+
+    string interface;
+    cout << "Enter your network interface" << endl;
+    cin >> interface;
+
     //load firewall (egress)
-    system("tc qdisc add dev ens33 clsact");
-    system("tc filter add dev ens33 egress bpf da obj ./firewall_egress.o sec egress");
+    string cmd = "tc qdisc add dev " + interface + " clsact";
+    system(cmd.c_str());
+    cmd = "tc filter add dev " + interface + " egress bpf da obj ./firewall_egress.o sec egress";
+    system(cmd.c_str());
 
     //load firewall (ingress)
     EBPFLoader e("./firewall_ingress.o", "ens33");
@@ -23,3 +34,4 @@ int main()
     //exec()
 
 }
+

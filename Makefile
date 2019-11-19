@@ -8,7 +8,7 @@ SOURCE_FIREWALL := $(SOURCE)/firewall
 SOURCE_FRAMEWORK := $(SOURCE)/framework
 SOURCE_MODULE := $(SOURCE)/module
 SOURCE_TEST := ./test
-
+SOURCE_ETC := $(SOURCE)/etc
 
 HEADER := ./headers
 HEADER_BPF := $(HEADER)/bpf
@@ -56,9 +56,12 @@ bpf_load.o:
 # 	g++ $(SOURCE_FRAMEWORK)/*.cpp $(SOURCE_FRAMEWORK)/bpf_load.o $(SOURCE_TEST)/test_netrulemanager.cpp \
 # 	-o $(BUILD)/main_test -I$(HEADER) -I$(HEADER_BPF) -lbpf -lelf -fPIC
 
+cleanmap :
+	clang -O2 -Wall -I$(HEADER) -I$(HEADER_BPF) $(SOURCE_ETC)/cleanmap.c $(SOURCE_FRAMEWORK)/bpf_load.o -lbpf -lelf -o $(BUILD)/cleanmap
+
+
 test2:
 	g++ -o $(BUILD)/test $(SOURCE_TEST)/test_module.cpp -lframework -I$(HEADER) -I$(HEADER_BPF) -L$(BUILD)
-
 
 clean_firewall:
 	rm $(BUILD)/*.o
@@ -67,5 +70,9 @@ clean_framework:
 	rm $(BUILD)/libframework.so
 	rm $(BUILD)/core
 
-clean: clean_firewall clean_framework
+clean_cleanmap:
+	rm $(BUILD)/cleanmap
+
+clean: clean_firewall clean_framework cleanmap
+
 
